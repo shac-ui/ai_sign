@@ -1,0 +1,13 @@
+APScheduler>=3.10.4
+python-dotenv>=1.0.0
+loguru>=0.7.2
+httpx[socks]>=0.27.0
+
+# APP 自动化（按需安装，根据平台选择）
+# Android：
+#   pip install uiautomator2
+#   python -m uiautomator2 init   （首次使用，向手机推送 agent）
+#
+# iOS：
+#   pip install facebook-wda "tidevice[openssl]"
+#   tidevice wdaproxy -B com.facebook.wda.WebDriverAgent.Runner --port 8100

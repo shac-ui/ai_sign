@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    无障碍服务配置
+    accessibilityEventTypes：监听的事件类型
+      - typeWindowStateChanged：页面切换时触发（APP 启动/切换页面）
+      - typeWindowContentChanged：页面内容变化时触发（列表刷新、弹窗出现）
+      - typeViewScrolled：滚动时触发
+    packageNames：目标 APP 包名，留空表示监听所有 APP（运行时动态设置包名更灵活）
+    feedbackType：反馈类型，必填，设为 feedbackGeneric
+    notificationTimeout：事件去抖动时间（毫秒）
+    canRetrieveWindowContent：允许读取窗口内容（查找按钮必须开启）
+    canPerformGestures：允许执行手势（点击操作）
+-->
+<accessibility-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRequestEnhancedWebAccessibility"
+    android:canRetrieveWindowContent="true"
+    android:canPerformGestures="true"
+    android:notificationTimeout="200"
+    android:settingsActivity="com.ai_sign.assistant.ui.MainActivity"
+    android:description="@string/accessibility_service_description" />
