@@ -44,7 +44,7 @@ def _do_checkin(check_type: CheckType) -> bool:
 
     try:
         payload = _build_checkin_payload(check_type)
-        with httpx.Client(timeout=15) as client:
+        with httpx.Client(timeout=15, trust_env=False) as client:
             resp = client.post(_CHECKIN_URL, json=payload)
             resp.raise_for_status()
             data = resp.json()

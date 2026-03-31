@@ -35,6 +35,7 @@ class DingTalkAuth:
             headers={"User-Agent": _USER_AGENT},
             timeout=15,
             follow_redirects=True,
+            trust_env=False,  # 忽略系统代理环境变量，避免 SOCKS 代理依赖问题
         )
 
     @property

@@ -13,7 +13,7 @@ def send_notification(title: str, content: str) -> None:
 
     url = f"https://sctapi.ftqq.com/{config.serverchan_key}.send"
     try:
-        resp = httpx.post(url, data={"title": title, "desp": content}, timeout=10)
+        resp = httpx.post(url, data={"title": title, "desp": content}, timeout=10, trust_env=False)
         resp.raise_for_status()
         result = resp.json()
         if result.get("code") == 0:
