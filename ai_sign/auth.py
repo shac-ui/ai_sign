@@ -1,78 +1,33 @@
-"""钉钉登录鉴权模块：模拟 APP 登录流程获取 access_token"""
+"""鉴权模块：基于 Cookie 的会话管理
 
-import hashlib
-import time
-import httpx
+钉钉没有公开的「手机号+密码直接换 token」API。
+实际可行的方案是：用户手动登录一次浏览器版钉钉，
+将 Cookie 中的 dingtalk_token 填入 .env，脚本携带该 Cookie 发起打卡请求。
+
+Cookie 有效期约 7 天，过期后需重新登录并更新 .env。
+"""
+
 from ai_sign.config import config
-from ai_sign.logger import logger
 
-# 钉钉 APP 端接口基础地址
-_BASE_URL = "https://oapi.dingtalk.com"
-# 钉钉 APP 登录接口（逆向自官方 APP，仅做学习研究用途）
-_LOGIN_URL = "https://login.dingtalk.com/oauth2/challenge.htm"
-_TOKEN_URL = "https://oapi.dingtalk.com/connect/token"
-
-# 模拟 Android APP 的 User-Agent
-_USER_AGENT = (
-    "com.alibaba.android.rimet/7.6.10 "
-    "(Linux; U; Android 12; zh-CN; Build/SKQ1.211006.001) "
-    "AliApp(DingTalk/7.6.10) com.alibaba.wireless.security.open "
-    "Weex/0.26.0.3 BREW"
-)
+# 钉钉 Web 端打卡接口使用的 Host
+DINGTALK_WEB_HOST = "https://attend.dingtalk.com"
 
 
-def _md5(text: str) -> str:
-    return hashlib.md5(text.encode()).hexdigest()
+def get_auth_headers() -> dict:
+    """构造携带鉴权 Cookie 的请求头，所有 HTTP 请求都应携带此头部"""
+    cookie_parts = [f"dingtalk_token={config.dingtalk_token}"]
 
+    # 如果用户还填了完整 Cookie 字符串，则优先使用
+    cookie_str = config.dingtalk_cookie if config.dingtalk_cookie else "; ".join(cookie_parts)
 
-class DingTalkAuth:
-    """管理登录态与 token 刷新"""
-
-    def __init__(self) -> None:
-        self._access_token: str = ""
-        self._token_expire: float = 0.0
-        self._client = httpx.Client(
-            headers={"User-Agent": _USER_AGENT},
-            timeout=15,
-            follow_redirects=True,
-            trust_env=False,  # 忽略系统代理环境变量，避免 SOCKS 代理依赖问题
-        )
-
-    @property
-    def access_token(self) -> str:
-        if not self._access_token or time.time() >= self._token_expire:
-            self._refresh_token()
-        return self._access_token
-
-    def _refresh_token(self) -> None:
-        """重新登录并刷新 token"""
-        logger.info("正在刷新钉钉登录 token ...")
-        try:
-            payload = {
-                "mobile": config.mobile,
-                "password": _md5(config.password),
-                "grant_type": "password",
-                "client_id": "dingtalk",
-                "client_secret": "dingtalk",
-            }
-            resp = self._client.post(_TOKEN_URL, data=payload)
-            resp.raise_for_status()
-            data = resp.json()
-
-            if data.get("errcode", 0) != 0:
-                raise RuntimeError(f"登录失败：{data.get('errmsg', '未知错误')}")
-
-            self._access_token = data["access_token"]
-            # token 有效期通常 7200 秒，提前 5 分钟刷新
-            self._token_expire = time.time() + data.get("expires_in", 7200) - 300
-            logger.info("钉钉 token 刷新成功")
-        except httpx.HTTPError as exc:
-            logger.error(f"网络请求失败：{exc}")
-            raise
-
-    def close(self) -> None:
-        self._client.close()
-
-
-# 模块级单例，供其他模块直接 import 使用
-auth = DingTalkAuth()
+    return {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0.0.0 Safari/537.36 DingTalk/7.6.10"
+        ),
+        "Cookie": cookie_str,
+        "Content-Type": "application/json",
+        "Referer": "https://attend.dingtalk.com/",
+        "Origin": "https://attend.dingtalk.com",
+    }

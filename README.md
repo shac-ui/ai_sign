@@ -18,7 +18,7 @@
 
 | 方案 | 优点 | 缺点 |
 |------|------|------|
-| **Python + httpx**（本项目） | 轻量、无需安装 APP 环境、可运行在服务器/树莓派/NAS | 需要逆向 APP 接口，接口变更需维护 |
+| **Python + Cookie**（本项目） | 轻量、无需安装 APP 环境、可运行在服务器/树莓派/NAS | Cookie 有效期约 7 天，需周期性更新 |
 | Appium + Android 模拟器 | 真实模拟人工点击，稳定性高 | 资源消耗大（需 GUI），配置复杂 |
 | ADB 控制真机 | 直接操作真机，最接近真实操作 | 需要持续保持手机连接 USB |
 | 钉钉开放平台 OpenAPI | 官方接口，稳定 | 仅支持企业管理员操作，普通员工无法使用 |
@@ -55,19 +55,27 @@ source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. 配置账号
+### 2. 获取钉钉 Cookie 并配置
+
+钉钉没有公开的"账号密码直接换 token"API，需要通过浏览器手动抓取一次 Cookie：
+
+**步骤一：抓取 Cookie**
+
+1. 用 Chrome 打开 [https://attend.dingtalk.com](https://attend.dingtalk.com) 并扫码登录
+2. 按 `F12` 打开开发者工具 → `Application` → `Cookies` → `attend.dingtalk.com`
+3. 找到 **`dingtalk_token`** 字段，复制其值
+4. 在同一 Cookie 列表中找到 **`empid`** 字段（即 userId），复制其值
+
+**步骤二：填写配置文件**
 
 ```bash
 cp .env.example .env
-# 用编辑器打开 .env，填入手机号、密码、公司 GPS 坐标等
 ```
 
-`.env` 配置说明：
-
 ```ini
-# 账号
-DINGTALK_MOBILE=13800138000
-DINGTALK_PASSWORD=your_password
+# 从浏览器 Cookie 中抓取（有效期约 7 天，过期重新抓取）
+DINGTALK_TOKEN=your_dingtalk_token_here
+DINGTALK_USER_ID=your_empid_here
 
 # 打卡时间（cron：分 时 日 月 周）
 CHECKIN_CRON=0 9 * * 1-5     # 周一到周五 09:00 上班打卡
@@ -175,8 +183,8 @@ tail -f logs/ai_sign_$(date +%Y-%m-%d).log
 **Q：打卡后显示"地点异常"？**
 A：GPS 坐标必须与公司打卡范围一致，坐标偏差过大会被标记异常。可在手机地图 App 上获取精确坐标。
 
-**Q：登录失败报错 401？**
-A：钉钉 APP 端接口可能发生变化，需更新 `auth.py` 中的接口地址和参数。
+**Q：打卡返回 401/302 或提示 Cookie 失效？**
+A：Cookie 有效期约 7 天。重新打开 [attend.dingtalk.com](https://attend.dingtalk.com) 登录，抓取新的 `dingtalk_token` 更新到 `.env` 即可。
 
 **Q：能否部署在树莓派/NAS 上？**
 A：可以，只需 Python 3.10+ 环境，资源占用极低（内存 < 30MB）。
