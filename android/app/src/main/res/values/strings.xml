@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AiSign 辅助打卡</string>
+    <string name="accessibility_service_label">AiSign 辅助打卡服务</string>
+    <string name="accessibility_service_description">
+        AiSign 需要无障碍权限来监听打卡 APP 的界面，在设定时间自动点击打卡按钮。
+        本应用不会收集任何个人信息。
+    </string>
+
+    <!-- 通知渠道 -->
+    <string name="notification_channel_id">ai_sign_channel</string>
+    <string name="notification_channel_name">打卡通知</string>
+    <string name="notification_checkin_title">正在自动打卡…</string>
+    <string name="notification_success">打卡成功 ✅</string>
+    <string name="notification_failure">打卡失败，请手动检查 ❌</string>
+
+    <!-- UI 文案 -->
+    <string name="title_config">打卡配置</string>
+    <string name="label_target_package">打卡 APP 包名</string>
+    <string name="label_checkin_button_text">打卡按钮文字</string>
+    <string name="label_checkin_button_id">打卡按钮 ID（可选）</string>
+    <string name="label_checkin_time">上班打卡时间</string>
+    <string name="label_checkout_time">下班打卡时间</string>
+    <string name="label_success_text">成功提示文字（可选）</string>
+    <string name="label_popup_dismiss">弹窗关闭按钮文字（逗号分隔）</string>
+    <string name="label_random_delay">随机延迟（秒）</string>
+    <string name="btn_save">保存配置</string>
+    <string name="btn_test">立即测试打卡</string>
+    <string name="btn_enable_accessibility">开启无障碍权限</string>
+    <string name="status_accessibility_on">无障碍服务：已开启 ✅</string>
+    <string name="status_accessibility_off">无障碍服务：未开启（点击前往设置）</string>
+</resources>
